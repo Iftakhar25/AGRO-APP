@@ -76,7 +76,8 @@ with st.sidebar:
     st.header("📸 Upload Image")
     uploaded_file = st.file_uploader(
         "Choose a plant image (leaf, stem, fruit)",
-        type=["jpg", "jpeg", "png", "webp", "heic"]
+        type=["jpg", "jpeg", "png", "webp", "heic"],
+        accept_multiple_files=True
     )
 
     st.markdown("### 🧾 Image Tips")
@@ -142,26 +143,40 @@ def call_gemini_with_image(image_bytes: bytes, prompt_text: str, thinking_budget
 # ---------------------------
 # MAIN CONTENT
 # ---------------------------
+# ---------------------------
+# MAIN CONTENT: MULTIPLE IMAGE UPLOAD & GEMINI CALLS
+# ---------------------------
 if uploaded_file:
-    try:
-        image = Image.open(uploaded_file)
-        st.image(image, use_container_width=True, caption=f"Uploaded: {uploaded_file.name}")
-    except Exception as e:
-        st.error(f"Couldn't open image: {e}")
-        st.stop()
+    images = []
+    image_bytes_list = []
 
-    buf = io.BytesIO()
-    image.convert("RGB").save(buf, format="JPEG", quality=90)
-    image_bytes = buf.getvalue()
+    # --- PROCESS UPLOADED IMAGES ---
+    for file in uploaded_file:
+        try:
+            image = Image.open(file)
+            images.append(image)
 
-    # Check size
-    size_mb = len(image_bytes) / (1024 * 1024)
-    if size_mb > 18:
-        st.warning(f"Image size {size_mb:.1f} MB — near Gemini limit (~20 MB). Consider resizing.")
+            # Display each image
+            st.image(image, use_container_width=True, caption=f"Uploaded: {file.name}")
+
+            # Convert to JPEG bytes
+            buf = io.BytesIO()
+            image.convert("RGB").save(buf, format="JPEG", quality=90)
+            image_bytes = buf.getvalue()
+            image_bytes_list.append(image_bytes)
+
+        except Exception as e:
+            st.error(f"Couldn't open image {file.name}: {e}")
+            continue  # Continue processing other files
+
+    # --- WARN IF TOTAL SIZE IS LARGE ---
+    total_size_mb = sum(len(b) for b in image_bytes_list) / (1024 * 1024)
+    if total_size_mb > 18:
+        st.warning(f"Total images size {total_size_mb:.1f} MB — near Gemini limit (~20 MB). Consider resizing.")
 
     # --- PROMPTS ---
     prompt_find_disease = (
-        "You are an expert plant pathologist. Analyze the image and:\n"
+        "You are an expert plant pathologist. Analyze all the image and:\n"
         "1️⃣ Identify the most likely disease(s) or disorders.\n"
         "2️⃣ Describe key visible symptoms.\n"
         "3️⃣ Suggest probable causal agents (fungus/bacteria/virus/stress).\n"
@@ -183,36 +198,61 @@ if uploaded_file:
 
     # --- HANDLE ACTION BUTTONS ---
     if find_disease:
-        with st.spinner("🔍 Analyzing image for likely disease..."):
-            output = call_gemini_with_image(image_bytes, prompt_find_disease, thinking_budget=500)
-        st.session_state.results.append({
-            "title": "🔬 Likely Disease(s) & Diagnostic Clues",
-            "content": output
-        })
+        with st.spinner("🔍 Analyzing image(s) for likely disease..."):
+            for idx, img_bytes in enumerate(image_bytes_list):
+                output = call_gemini_with_image(img_bytes, prompt_find_disease, thinking_budget=500)
+                st.session_state.results.append({
+                    "title": f"🔬 Likely Disease(s) & Diagnostic Clues (Image {idx+1})",
+                    "content": output
+                })
 
     if suggestions:
         with st.spinner("🧪 Generating management suggestions..."):
-            output = call_gemini_with_image(image_bytes, prompt_suggestions, thinking_budget=400)
-        st.session_state.results.append({
-            "title": "🩺 Practical Suggestions & Monitoring Plan",
-            "content": output
-        })
+            for idx, img_bytes in enumerate(image_bytes_list):
+                output = call_gemini_with_image(img_bytes, prompt_suggestions, thinking_budget=400)
+                st.session_state.results.append({
+                    "title": f"🩺 Practical Suggestions & Monitoring Plan (Image {idx+1})",
+                    "content": output
+                })
 
     if custom_question:
         if not custom_user_prompt.strip():
             st.warning("⚠️ Please type a custom question first.")
         else:
             combined_prompt = (
-                "You are a helpful plant pathology assistant. Use the image to inform your answer.\n\n"
+                "You are a helpful plant pathology assistant. Use the image(s) to inform your answer.\n\n"
                 f"User question: {custom_user_prompt}\n\n"
                 "Provide a concise, practical answer and list any assumptions you made.note..please remind strictly that you have to give every response in Bengali language"
             )
             with st.spinner("🤖 Asking the model your custom question..."):
-                output = call_gemini_with_image(image_bytes, combined_prompt, thinking_budget=200)
-            st.session_state.results.append({
-                "title": f"❓ Answer to: {custom_user_prompt}",
-                "content": output
-            })
+                for idx, img_bytes in enumerate(image_bytes_list):
+                    output = call_gemini_with_image(img_bytes, combined_prompt, thinking_budget=200)
+                    st.session_state.results.append({
+                        "title": f"❓ Answer to: {custom_user_prompt} (Image {idx+1})",
+                        "content": output
+                    })
+
+    # --- DISPLAY RESULTS AS CARDS ---
+    if st.session_state.results:
+        st.markdown("---")
+        st.markdown("### 🌾 Results Feed")
+        for result in reversed(st.session_state.results):
+            st.markdown(
+                f"""
+                <div style="
+                    background-color: rgba(255,255,255,0.9);
+                    border-radius: 15px;
+                    padding: 1.2rem;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+                    margin-bottom: 1rem;
+                    border: 1px solid #e5e5e5;
+                ">
+                    <h4 style="color:#2b7a0b;">{result['title']}</h4>
+                    <p style="color:#333; font-size:16px; line-height:1.6;">{result['content']}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
     # --- DISPLAY RESULTS AS CARDS ---
     if st.session_state.results:
