@@ -248,7 +248,7 @@ st.markdown(
     """
     <style>
     .footer {
-        position: bottom;
+        position: fixed;
         left: 0;
         bottom: 0;
         width: 100%;
@@ -267,7 +267,7 @@ st.markdown(
     }
     .footer .big-text {
         font-size: 16px;
-        font-weight: bold;
+        font-weight: italic;
         color: #000;
     }
     </style>
@@ -278,5 +278,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
