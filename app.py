@@ -277,24 +277,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-🔹 How This Works
-position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); → centers the footer horizontally at the bottom without covering content.
-
-.big-text → adds a border around your name only, not a full bar.
-
-padding and border-radius → makes the border look clean and professional.
-
-No background color for the footer → the page background remains untouched.
-
-🔹 Optional Enhancements
-Change the border color to match your brand: border: 1px solid #4CAF50;
-
-Add a hover effect on your name:
-
-css
-Copy code
-.footer .big-text:hover {
-    background-color: #4CAF50;
-    color: white;
-    transition: 0.3s;
-}
