@@ -88,6 +88,23 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### ⚙️ Actions")
+    st.markdown("""
+    <style>
+    /* Normal button style */
+    .stButton>button {
+        background-color: #4CAF50;  /* Green */
+        color: white;
+        border-radius: 8px;
+        padding: 10px 24px;
+        transition: 0.3s;  /* Smooth hover effect */
+    }
+    /* Hover effect */
+    .stButton>button:hover {
+        background-color: #45a049;  /* Darker green when hovering */
+        color: yellow;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
     find_disease = st.button("🔬 Find Disease (Auto)")
     suggestions = st.button("🩺 Suggestions & Advice")
