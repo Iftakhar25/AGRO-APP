@@ -165,7 +165,7 @@ if uploaded_file:
         "1️⃣ Identify the most likely disease(s) or disorders.\n"
         "2️⃣ Describe key visible symptoms.\n"
         "3️⃣ Suggest probable causal agents (fungus/bacteria/virus/stress).\n"
-        "4️⃣ Give confidence level and further confirmation steps."
+        "4️⃣ Give confidence level and further confirmation steps.note..please remind strictly that you have to give every response in Bengali language"
     )
 
     prompt_suggestions = (
@@ -173,7 +173,7 @@ if uploaded_file:
         "A) Immediate actions (removal, isolation, sanitation)\n"
         "B) Cultural/non-chemical solutions\n"
         "C) Chemical options (types, active ingredients, safety notes)\n"
-        "D) Monitoring plan and follow-up guidance."
+        "D) Monitoring plan and follow-up guidance.note..please remind strictly that you have to give every response in Bengali language"
     )
 
     custom_user_prompt = st.text_input(
@@ -205,7 +205,7 @@ if uploaded_file:
             combined_prompt = (
                 "You are a helpful plant pathology assistant. Use the image to inform your answer.\n\n"
                 f"User question: {custom_user_prompt}\n\n"
-                "Provide a concise, practical answer and list any assumptions you made."
+                "Provide a concise, practical answer and list any assumptions you made.note..please remind strictly that you have to give every response in Bengali language"
             )
             with st.spinner("🤖 Asking the model your custom question..."):
                 output = call_gemini_with_image(image_bytes, combined_prompt, thinking_budget=200)
@@ -278,7 +278,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 
 
