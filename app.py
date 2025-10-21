@@ -267,7 +267,7 @@ st.markdown(
     }
     .footer .big-text {
         font-size: 16px;
-        font-weight: italic;
+        font-weight: bold;
         color: #000;
     }
     </style>
@@ -278,6 +278,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
