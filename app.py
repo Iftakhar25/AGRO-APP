@@ -248,10 +248,10 @@ st.markdown(
     """
     <style>
     .footer {
-        position: fixed;
+        position: bottom;
         left: 0;
         bottom: 0;
-        width: 50%;
+        width: 100%;
         background-color: #f1f1f1;
         color: #333;
         text-align: center;
@@ -278,4 +278,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
