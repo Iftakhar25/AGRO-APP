@@ -241,23 +241,19 @@ if uploaded_file:
 
 else:
     st.info("📤 Please upload an image to get started. Use the sidebar to select a clear, well-lit photo of the symptomatic plant area.")
-st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:50px'></div>", unsafe_allow_html=True)
 
-# --- Footer ---
+# --- Minimalist Footer ---
 st.markdown(
     """
     <style>
     .footer {
         position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #f1f1f1;
-        color: #333;
+        left: 50%;
+        bottom: 10px;
+        transform: translateX(-50%);
         text-align: center;
-        padding: 10px;
-        font-size: 14px;
-        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        font-family: sans-serif;
         z-index: 9999;
     }
     .footer .small-text {
@@ -269,6 +265,9 @@ st.markdown(
         font-size: 16px;
         font-weight: bold;
         color: #000;
+        border: 1px solid #000;  /* Outline border around name */
+        padding: 2px 6px;
+        border-radius: 4px;
     }
     </style>
     <div class="footer">
@@ -278,3 +277,24 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+🔹 How This Works
+position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); → centers the footer horizontally at the bottom without covering content.
+
+.big-text → adds a border around your name only, not a full bar.
+
+padding and border-radius → makes the border look clean and professional.
+
+No background color for the footer → the page background remains untouched.
+
+🔹 Optional Enhancements
+Change the border color to match your brand: border: 1px solid #4CAF50;
+
+Add a hover effect on your name:
+
+css
+Copy code
+.footer .big-text:hover {
+    background-color: #4CAF50;
+    color: white;
+    transition: 0.3s;
+}
