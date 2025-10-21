@@ -56,7 +56,7 @@ add_bg_from_local("images/farmer_bg.jpg")  # Example: place your image here
 # ---------------------------
 # PAGE HEADER
 # ---------------------------
-st.title("🌿 AgriDiag — Plant Disease Detection & Advice (Gemini 2.5-Flash)")
+st.title("🌿 AgriDiag — Plant Disease Detection & Advice")
 st.caption("Your friendly AI farm companion — diagnose, manage, and protect your crops with confidence.")
 
 # ---------------------------
@@ -241,3 +241,40 @@ if uploaded_file:
 
 else:
     st.info("📤 Please upload an image to get started. Use the sidebar to select a clear, well-lit photo of the symptomatic plant area.")
+st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
+
+# --- Footer ---
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        color: #333;
+        text-align: center;
+        padding: 10px;
+        font-size: 14px;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        z-index: 9999;
+    }
+    .footer .small-text {
+        font-size: 12px;
+        color: #555;
+        margin-right: 5px;
+    }
+    .footer .big-text {
+        font-size: 16px;
+        font-weight: bold;
+        color: #000;
+    }
+    </style>
+    <div class="footer">
+        <span class="small-text">Made by</span>
+        <span class="big-text">IFTAKHAR</span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
