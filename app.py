@@ -111,6 +111,7 @@ with st.sidebar:
     suggestions = st.button("🩺 Suggestions & Advice")
     custom_question = st.button("❓ Ask (Custom Prompt)")
     clear_results = st.button("🗑️ Clear All Results")
+    compare_results = st.button("📊 Compare All Results")
 
 # ---------------------------
 # SESSION STATE
@@ -121,6 +122,9 @@ if "results" not in st.session_state:
 if clear_results:
     st.session_state.results = []
     st.rerun()
+
+if "comparison_data" not in st.session_state:
+    st.session_state.comparison_data = []
 
 # ---------------------------
 # GEMINI HELPER FUNCTION
@@ -149,30 +153,27 @@ def call_gemini_with_image(image_bytes: bytes, prompt_text: str, thinking_budget
 if uploaded_file:
     images = []
     image_bytes_list = []
+    image_names = []
 
-    # --- PROCESS UPLOADED IMAGES ---
     for file in uploaded_file:
         try:
             image = Image.open(file)
             images.append(image)
-
-            # Display each image
+            image_names.append(file.name)
             st.image(image, use_container_width=True, caption=f"Uploaded: {file.name}")
 
-            # Convert to JPEG bytes
             buf = io.BytesIO()
             image.convert("RGB").save(buf, format="JPEG", quality=90)
-            image_bytes = buf.getvalue()
-            image_bytes_list.append(image_bytes)
+            image_bytes_list.append(buf.getvalue())
 
         except Exception as e:
             st.error(f"Couldn't open image {file.name}: {e}")
-            continue  # Continue processing other files
+            continue
 
-    # --- WARN IF TOTAL SIZE IS LARGE ---
     total_size_mb = sum(len(b) for b in image_bytes_list) / (1024 * 1024)
     if total_size_mb > 18:
         st.warning(f"Total images size {total_size_mb:.1f} MB — near Gemini limit (~20 MB). Consider resizing.")
+
 
     # --- PROMPTS ---
     prompt_find_disease = (
@@ -198,6 +199,7 @@ if uploaded_file:
 
     # --- HANDLE ACTION BUTTONS ---
     if find_disease:
+        st.session_state.comparison_data = []  # Reset on new analysis
         with st.spinner("🔍 Analyzing image(s) for likely disease..."):
             for idx, img_bytes in enumerate(image_bytes_list):
                 output = call_gemini_with_image(img_bytes, prompt_find_disease, thinking_budget=500)
@@ -205,6 +207,13 @@ if uploaded_file:
                     "title": f"🔬 Likely Disease(s) & Diagnostic Clues (Image {idx+1})",
                     "content": output
                 })
+                st.session_state.comparison_data.append({
+                    "Image": image_names[idx],
+                    "Disease": output,
+                    "Suggestions": "Not yet generated",
+                    "Confidence": "N/A"
+                })
+
 
     if suggestions:
         with st.spinner("🧪 Generating management suggestions..."):
@@ -214,6 +223,10 @@ if uploaded_file:
                     "title": f"🩺 Practical Suggestions & Monitoring Plan (Image {idx+1})",
                     "content": output
                 })
+                # Update the corresponding entry
+                if idx < len(st.session_state.comparison_data):
+                    st.session_state.comparison_data[idx]["Suggestions"] = output
+
 
     if custom_question:
         if not custom_user_prompt.strip():
@@ -231,6 +244,17 @@ if uploaded_file:
                         "title": f"❓ Answer to: {custom_user_prompt} (Image {idx+1})",
                         "content": output
                     })
+
+    import pandas as pd
+
+    if compare_results:
+        if not st.session_state.comparison_data:
+            st.warning("⚠️ Please run 'Find Disease' and 'Suggestions' first before comparing.")
+        else:
+            st.markdown("### 📊 Comparison Table of All Images")
+            df = pd.DataFrame(st.session_state.comparison_data)
+            st.dataframe(df, use_container_width=True, height=400)
+
 
     # --- DISPLAY RESULTS AS CARDS ---
     if st.session_state.results:
